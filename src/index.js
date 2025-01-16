@@ -1,29 +1,24 @@
-console.log("working")
+console.log('working');
 
-import { home } from "./pages/home.js";
-import { about } from "./pages/about.js";
-import { menu } from './pages/menu.js'
+import { callGiphy, callWeatherAPI } from './api.js';
 
-const contentDiv = document.getElementById('content')
+const input = document.getElementById('location');
+const submit = document.getElementById('submit');
+const content = document.getElementById('content');
 
-const navBtns = Array.from(document.getElementById('navbar').children)
-console.log(navBtns)
-
-navBtns.forEach(btn => btn.addEventListener('click', e => loadContent(e.target.id)))
-
-const loadContent = (pageId) => {
-    switch (pageId) {
-        case 'home':
-            contentDiv.innerHTML = '';
-            contentDiv.appendChild(home())
-            break;
-        case 'menu':
-            contentDiv.innerHTML = '';
-            contentDiv.appendChild(menu())
-            break;
-        case 'about':
-            contentDiv.innerHTML = '';
-            contentDiv.appendChild(about())
-            break;
-    }
-}
+submit.addEventListener('click', async () => {
+    console.log(input.value);
+    const weatherData = await callWeatherAPI(input.value);
+    const giphy = await callGiphy(
+        weatherData.currentConditions.icon.split('-').join(' ')
+    );
+    const gifLink = giphy.data.images.original.url;
+    console.log(gifLink);
+    content.innerHTML = `
+    <h1>${weatherData.resolvedAddress}</h1
+    <p>Summary - ${weatherData.description}</p>
+    <p>Today's Forecast - ${weatherData.currentConditions.conditions}</p>
+    <p>The weather is ${Math.floor((((weatherData.currentConditions.temp - 32) * 5) / 9) * 100) / 100} C.</p>
+    <img src=${gifLink}>
+    `;
+});
